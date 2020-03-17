@@ -1,0 +1,36 @@
+News@
+        https://www.nhk.or.jp/rss/news/cat0.xml,
+        https://assets.wor.jp/rss/rdf/reuters/top.rdf,
+        https://assets.wor.jp/rss/rdf/nikkei/news.rdf,
+        feed:https://news.nifty.com/rss/topics_domestic.xml,
+        https://mainichi.jp/rss/etc/mainichi-flash.rss,
+        https://news.yahoo.co.jp/pickup/rss.xml
+---
+デジタル@
+        https://www.gizmodo.jp/index.xml,
+        https://rss.itmedia.co.jp/rss/2.0/topstory.xml,
+        https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml,
+        feed://feeds.japan.cnet.com/rss/cnet/all.rdf,
+        feed:https://news.nifty.com/rss/magazine_technology.xml,
+        http://pc.watch.impress.co.jp/sublink/pc.rdf,
+        http://rss.rssad.jp/rss/itmatmarkit/rss.xml,
+        http://www.atmarkit.co.jp/rss/rss091.xml
+---
+ネタ系@
+        http://blog.livedoor.jp/dqnplus/index.rdf,
+        feed://hamusoku.com/index.rdf,
+        https://b.hatena.ne.jp/hotentry.rss,
+        http://agora-web.jp/atom.xml,
+---
+雑誌系@
+        feed:https://news.nifty.com/rss/magazine_nhktext.xml,
+        feed:https://news.nifty.com/rss/magazine_newsweek.xml,
+        feed:https://news.nifty.com/rss/magazine_spa.xml,
+        https://headlines.yahoo.co.jp/rss/digiday-all.xml,
+        https://headlines.yahoo.co.jp/rss/friday-all.xml,
+        https://wired.jp/rssfeeder/,
+---
+公的機関@
+	feed:https://www.mhlw.go.jp/stf/news.rdf,
+	feed:https://www.mhlw.go.jp/rss/inful_news.rdf
+	
