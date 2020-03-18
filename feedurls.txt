@@ -28,7 +28,7 @@ News@
         feed:https://news.nifty.com/rss/magazine_spa.xml,
         https://headlines.yahoo.co.jp/rss/digiday-all.xml,
         https://headlines.yahoo.co.jp/rss/friday-all.xml,
-        https://wired.jp/rssfeeder/,
+        feed:https://wired.jp/rssfeeder/,
 ---
 公的機関@
 	feed:https://www.mhlw.go.jp/stf/news.rdf,

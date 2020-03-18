@@ -4,19 +4,25 @@ from datetime import datetime as dt
 import webbrowser
 import pickle
 
-with open(file="feedurls.txt", mode="r") as f:
+with open(file="feedurls.txt", mode="r",encoding="utf-8") as f:
     urlinfo = f.read()
 jogaimoji = (" ", "\n", "\t")
+
 for jmoji in jogaimoji:
     urlinfo = urlinfo.replace(jmoji, "")
+
 urlinfo = urlinfo.split("---")
 urls = {}
+
 for i in urlinfo:
+    i = i.strip(",")
     a = i.split("@")
     feedurls = a[1].strip().split(",")
     urls[a[0]] = feedurls
+    print(a[0])
     for prurl in feedurls:
         print(prurl)
+    print()
 
 
 feed_genres = tuple(urls.keys())
@@ -26,12 +32,12 @@ for n, s in enumerate(feed_genres):
     display_genres += f"|{n}: {s} |"
 
 
-def selectgenre(d_genres, f_genres):
+def selectgenre(genretitles, genredata):
     while True:
-        print(f"Feed types are {d_genres}")
+        print(f"Feed types are {genretitles}")
         try:
             genrenum = int(input("閲覧するFeed typeを番号で入力してください: "))
-            ftype = f_genres[genrenum]
+            ftype = genredata[genrenum]
             break
         except ValueError:
             print("Value Errorです")
@@ -145,6 +151,7 @@ while True:
     print("記事のジャンルを変更する場合はgを入力してください")
     print("閲覧済みの記事を読みたい場合はcを入力してください")
     n = input("見たい記事の番号を入力: ")
+
     if n.lower() == "q":
         break
     elif n.lower() == "g":
