@@ -4,7 +4,7 @@ from datetime import datetime as dt
 import webbrowser
 import pickle
 
-with open(file="feedurls.txt", mode="r",encoding="utf-8") as f:
+with open(file="feedurls.txt", mode="r", encoding="utf-8") as f:
     urlinfo = f.read()
 jogaimoji = (" ", "\n", "\t")
 
@@ -19,10 +19,6 @@ for i in urlinfo:
     a = i.split("@")
     feedurls = a[1].strip().split(",")
     urls[a[0]] = feedurls
-    print(a[0])
-    for prurl in feedurls:
-        print(prurl)
-    print()
 
 
 feed_genres = tuple(urls.keys())
@@ -62,7 +58,9 @@ def getentries(gurls, oldentry=[], checkedtitle=[]):
     exclusionword = ["セール情報", "閲覧注意"]
 
     for url in gurls:
-        for entry in parse(url).entries:
+        entrydic = parse(url).entries
+        print(f"{url}の記事を{len(entrydic)}件取得")
+        for entry in entrydic:
             kiji = {
                 "title": entry["title"], "link": entry["link"],
                 "date": parseDate(entry["updated_parsed"] or entry["published_parsed"])
@@ -148,8 +146,12 @@ while True:
     print("     "*25)
     displayTitle(rssentries, 37)
     print()
-    print("記事のジャンルを変更する場合はgを入力してください")
-    print("閲覧済みの記事を読みたい場合はcを入力してください")
+    print("""
+    以下の操作を行う場合は冒頭のアルファベットを入力してください
+    g: 記事のジャンルを変更する場合
+    c: 閲覧済みの記事を読みたい場合
+    """)
+
     n = input("見たい記事の番号を入力: ")
 
     if n.lower() == "q":
