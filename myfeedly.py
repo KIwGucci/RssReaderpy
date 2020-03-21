@@ -196,6 +196,7 @@ def main():
             savefeed(rssentries, checkedtitle, removed, feedtype)
             feedtype = selectgenre(display_genres, feed_genres)
             checkedtitle, oldentry, removed = readfeed(feedtype)
+            displaymode = True
             continue
         elif n.lower() == "c":
 
@@ -214,10 +215,10 @@ def main():
                     break
                 except ValueError:
                     print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
-                    continue
                 except IndexError:
                     print("IndexError")
-                    continue
+                
+                n = input("見たい記事の番号を入力: ")
 
     savefeed(rssentries, checkedtitle, removed, feedtype)
 
