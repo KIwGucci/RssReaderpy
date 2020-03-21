@@ -29,7 +29,7 @@ def parseDate(dateData):
 
 
 # 取得&整形
-def getentries(gurls, oldentry, checkedtitle, removetitle, sourceurl, displaymode=True):
+def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
     getentry = oldentry
     # 除外する記事のキーワード
     exclusionword = ["セール情報", "閲覧注意"]
@@ -42,11 +42,17 @@ def getentries(gurls, oldentry, checkedtitle, removetitle, sourceurl, displaymod
             kiji = {
                 "title": entry["title"], "link": entry["link"],
                 "date": parseDate(entry["updated_parsed"] or entry["published_parsed"]),
-                "sourceurl": sourceurl
+                "sourceurl": url
             }
             if True in [word in kiji["title"] for word in exclusionword]:
                 continue
-            elif kiji not in getentry and kiji not in checkedtitle and kiji not in removetitle:
+            elif True in [kiji["link"] == k["link"] for k in getentry]:
+                continue
+            elif True in [kiji["link"] == k["link"] for k in checkedtitle]:
+                continue
+            elif True in [kiji["link"] == k["link"] for k in removetitle]:
+                continue
+            else:
                 getentry.append(kiji)
     getentry.sort(key=lambda x: x["date"], reverse=True)
     return getentry
@@ -78,11 +84,15 @@ def writepickle(variable, filename):
 
 def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
     pretitle = ""
-    for number, entry in enumerate(rssfeeds[:maxcolumn]):
+    for number, entry in enumerate(rssfeeds):
         # タイトルを表示
         thistitle = entry['title']
+        sourceurl = entry["sourceurl"]
         if searchmode:
-            if searchword in thistitle:
+            import re
+            repatter = re.compile(searchword)
+            result = repatter.search(thistitle + sourceurl)
+            if result:
                 pass
             else:
                 maxcolumn += 1
@@ -92,6 +102,8 @@ def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
             continue
         pretitle = thistitle
         print(f'{number:0=2}: {thistitle[:36]}')
+        if number > maxcolumn:
+            return None
 
 
 def savefeed(rssfeeds, checkedfeeds, removefeeds, ftype):
@@ -189,25 +201,30 @@ def main():
     while True:
 
         rssentries = getentries(
-            urls[feedtype], oldentry, checkedtitle, removed, feedtype, displaymode)
+            urls[feedtype], oldentry, checkedtitle, removed, displaymode)
         # 2回目以降は取得件数を表示しない
         displaymode = False
         print("     "*25)
+        print(f"Feed Type: {feedtype}")
         if searchmode:
             print(f"検索ワード:{searchword}")
-            displayTitle(rssentries,37,searchword,searchmode)
-        else:
-            displayTitle(rssentries, 37,searchword,searchmode)
-        print(
-            """
-        以下の操作を行う場合は冒頭のアルファベットを入力してください
-        g: ジャンルを変更する c: 閲覧済記事を読む d: 記事除外Mode
+            displayTitle(rssentries, 37, searchword, searchmode)
+            print("""
+            fq で通常モードに戻る
             """)
+        else:
+            displayTitle(rssentries, 37, searchword, searchmode)
+            print()
+            print("g:ジャンルを変更する c:閲覧済記事を読む d:記事除外Mode f:検索モード q:終了")
 
         n = input("見たい記事の番号を入力: ")
 
         if n.lower() == "q":
             break
+        elif searchmode:
+            if n.lower() == "fq":
+                searchmode = False
+                continue
         elif n.lower() == "g":
             savefeed(rssentries, checkedtitle, removed, feedtype)
             feedtype = selectgenre(display_genres, feed_genres)
@@ -224,25 +241,22 @@ def main():
             searchmode = True
             searchword = input("検索ワード＝: ")
             continue
-        elif n.lower() =="fq":
-            searchmode = False
-            continue
-        else:
-            while True:
-                try:
-                    n = int(n)
-                    webbrowser.open_new(rssentries[n]["link"])
-                    checked = rssentries.pop(n)
-                    checkedtitle.append(checked)
-                    break
-                except ValueError:
-                    if n.lower() == "q":
-                        break
-                    print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
-                except IndexError:
-                    print("IndexError")
 
-                n = input("見たい記事の番号を入力: ")
+        while True:
+            try:
+                n = int(n)
+                webbrowser.open_new(rssentries[n]["link"])
+                checked = rssentries.pop(n)
+                checkedtitle.append(checked)
+                break
+            except ValueError:
+                if n.lower() == "q":
+                    return None
+                print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
+            except IndexError:
+                print("IndexError")
+
+            n = input("見たい記事の番号を入力: ")
 
     savefeed(rssentries, checkedtitle, removed, feedtype)
 
