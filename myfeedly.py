@@ -29,7 +29,7 @@ def parseDate(dateData):
 
 
 # 取得&整形
-def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
+def getentries(gurls, oldentry, checkedtitle, removetitle, sourceurl, displaymode=True):
     getentry = oldentry
     # 除外する記事のキーワード
     exclusionword = ["セール情報", "閲覧注意"]
@@ -41,7 +41,8 @@ def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
         for entry in entrydic:
             kiji = {
                 "title": entry["title"], "link": entry["link"],
-                "date": parseDate(entry["updated_parsed"] or entry["published_parsed"])
+                "date": parseDate(entry["updated_parsed"] or entry["published_parsed"]),
+                "sourceurl": sourceurl
             }
             if True in [word in kiji["title"] for word in exclusionword]:
                 continue
@@ -75,13 +76,19 @@ def writepickle(variable, filename):
         pickle.dump(variable, f)
 
 
-def displayTitle(rssfeeds, maxcolumn):
+def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
     pretitle = ""
     for number, entry in enumerate(rssfeeds[:maxcolumn]):
         # タイトルを表示
         thistitle = entry['title']
-        if pretitle == thistitle:
-            maxcolumn+=1
+        if searchmode:
+            if searchword in thistitle:
+                pass
+            else:
+                maxcolumn += 1
+                continue
+        elif pretitle == thistitle:
+            maxcolumn += 1
             continue
         pretitle = thistitle
         print(f'{number:0=2}: {thistitle[:36]}')
@@ -165,7 +172,7 @@ def main():
         feedurls = a[1].strip().split(",")
         urls[a[0]] = feedurls
 
-    feed_genres = tuple(urls.keys())
+    feed_genres = list(urls.keys())
     display_genres = "|"
 
     for n, s in enumerate(feed_genres):
@@ -177,16 +184,20 @@ def main():
     input("press Enter key: ")
     # 記事を取得する場合に各サイトの取得件数を表示する場合はTrue
     displaymode = True
+    searchmode = False
+    searchword = ""
     while True:
 
         rssentries = getentries(
-            urls[feedtype], oldentry, checkedtitle, removed, displaymode)
+            urls[feedtype], oldentry, checkedtitle, removed, feedtype, displaymode)
         # 2回目以降は取得件数を表示しない
         displaymode = False
-        # 日付順でソート
-        rssentries.sort(key=lambda x: x["date"], reverse=True)
         print("     "*25)
-        displayTitle(rssentries, 37)
+        if searchmode:
+            print(f"検索ワード:{searchword}")
+            displayTitle(rssentries,37,searchword,searchmode)
+        else:
+            displayTitle(rssentries, 37,searchword,searchmode)
         print(
             """
         以下の操作を行う場合は冒頭のアルファベットを入力してください
@@ -204,12 +215,18 @@ def main():
             displaymode = True
             continue
         elif n.lower() == "c":
-
             readchecked(checkedtitle)
             continue
         elif n.lower() == "d":
             rssentries, removed = removefeeds(rssentries, removed, feedtype)
             savefeed(rssentries, checkedtitle, removed, feedtype)
+        elif n.lower() == "f":
+            searchmode = True
+            searchword = input("検索ワード＝: ")
+            continue
+        elif n.lower() =="fq":
+            searchmode = False
+            continue
         else:
             while True:
                 try:
@@ -219,10 +236,12 @@ def main():
                     checkedtitle.append(checked)
                     break
                 except ValueError:
+                    if n.lower() == "q":
+                        break
                     print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
                 except IndexError:
                     print("IndexError")
-                
+
                 n = input("見たい記事の番号を入力: ")
 
     savefeed(rssentries, checkedtitle, removed, feedtype)
