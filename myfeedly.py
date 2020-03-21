@@ -47,6 +47,7 @@ def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
                 continue
             elif kiji not in getentry and kiji not in checkedtitle and kiji not in removetitle:
                 getentry.append(kiji)
+    getentry.sort(key=lambda x: x["date"], reverse=True)
     return getentry
 
 
@@ -75,11 +76,15 @@ def writepickle(variable, filename):
 
 
 def displayTitle(rssfeeds, maxcolumn):
+    pretitle = ""
     for number, entry in enumerate(rssfeeds[:maxcolumn]):
         # タイトルを表示
-        pretitle = entry['title']
-        thistitle = pretitle[:36]
-        print(f'{number:0=2}: {thistitle}')
+        thistitle = entry['title']
+        if pretitle == thistitle:
+            maxcolumn+=1
+            continue
+        pretitle = thistitle
+        print(f'{number:0=2}: {thistitle[:36]}')
 
 
 def savefeed(rssfeeds, checkedfeeds, removefeeds, ftype):
