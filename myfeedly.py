@@ -4,29 +4,6 @@ from datetime import datetime as dt
 import webbrowser
 import pickle
 
-with open(file="feedurls.txt", mode="r", encoding="utf-8") as f:
-    urlinfo = f.read()
-jogaimoji = (" ", "\n", "\t")
-
-for jmoji in jogaimoji:
-    urlinfo = urlinfo.replace(jmoji, "")
-
-urlinfo = urlinfo.split("---")
-urls = {}
-
-for i in urlinfo:
-    i = i.strip(",")
-    a = i.split("@")
-    feedurls = a[1].strip().split(",")
-    urls[a[0]] = feedurls
-
-
-feed_genres = tuple(urls.keys())
-display_genres = ""
-
-for n, s in enumerate(feed_genres):
-    display_genres += f"|{n}: {s} |"
-
 
 def selectgenre(genretitles, genredata):
     while True:
@@ -52,14 +29,15 @@ def parseDate(dateData):
 
 
 # 取得&整形
-def getentries(gurls, oldentry=[], checkedtitle=[]):
+def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
     getentry = oldentry
     # 除外する記事のキーワード
     exclusionword = ["セール情報", "閲覧注意"]
 
     for url in gurls:
         entrydic = parse(url).entries
-        print(f"{url}の記事を{len(entrydic)}件取得")
+        if displaymode:
+            print(f"{url}の記事を{len(entrydic)}件取得")
         for entry in entrydic:
             kiji = {
                 "title": entry["title"], "link": entry["link"],
@@ -67,24 +45,32 @@ def getentries(gurls, oldentry=[], checkedtitle=[]):
             }
             if True in [word in kiji["title"] for word in exclusionword]:
                 continue
-            elif kiji not in getentry and kiji not in checkedtitle:
+            elif kiji not in getentry and kiji not in checkedtitle and kiji not in removetitle:
                 getentry.append(kiji)
     return getentry
 
 
 def readpickle(filename):
+    pathname = './data_pickle'
+    filename = f'{filename}.pickle'
+    filepath = pathname+'/'+filename
     try:
-        with open(f'{filename}.pickle', 'rb') as f:
+        with open(filepath, 'rb') as f:
             variable = pickle.load(f)
     except FileNotFoundError:
+        import os
+        os.makedirs(pathname, exist_ok=True)
         variable = []
-        with open(f'{filename}.pickle', 'wb') as f:
+        with open(filepath, 'wb') as f:
             pickle.dump(variable, f)
     return variable
 
 
 def writepickle(variable, filename):
-    with open(f'{filename}.pickle', 'wb') as f:
+    pathname = './data_pickle'
+    filename = f'{filename}.pickle'
+    filepath = pathname+'/'+filename
+    with open(filepath, 'wb') as f:
         pickle.dump(variable, f)
 
 
@@ -96,17 +82,43 @@ def displayTitle(rssfeeds, maxcolumn):
         print(f'{number:0=2}: {thistitle}')
 
 
-def savefeed(rssfeeds, checkedfeeds):
+def savefeed(rssfeeds, checkedfeeds, removefeeds, ftype):
+    rssfeeds.sort(key=lambda x: x["date"], reverse=True)
     checkedfeeds.sort(key=lambda x: x["date"], reverse=True)
-    writepickle(rssentries[:500], feedtype+'oldentry')
-    writepickle(checkedfeeds[:500], feedtype+'checkedfeeds')
+    removefeeds.sort(key=lambda x: x["date"], reverse=True)
+    writepickle(rssfeeds[:500], ftype+'oldentry')
+    writepickle(checkedfeeds[:500], ftype+'checkedfeeds')
+    writepickle(removefeeds[:100], ftype+"removedfeeds")
 
 
 def readfeed(ftype):
-    """return (checkedfeeds, oldentry)"""
+    """return (checkedfeeds, oldentry,removed)"""
     checked = readpickle(ftype+"checkedfeeds")
     old = readpickle(ftype+"oldentry")
-    return checked, old
+    removed = readpickle(ftype+"removed")
+    return checked, old, removed
+
+
+def removefeeds(feeds, removed, ftype):
+    """remove feedtitle"""
+    print("   "*200)
+    while True:
+        print("   "*25)
+        displayTitle(feeds, 37)
+        print("除外モード")
+        print("除外モードを終える場合はqを入力")
+        n = input("除外する記事の番号を入力: ")
+        if n.lower() == "q":
+            break
+        else:
+            try:
+                n = int(n)
+                sure = input(f"{feeds[n]['title']}を除外しますか　y/n ?")
+                if sure.lower() == 'y':
+                    removed.append(feeds.pop(n))
+            except ValueError:
+                print("誤った入力です")
+    return feeds, removed
 
 
 def readchecked(feeds):
@@ -131,51 +143,84 @@ def readchecked(feeds):
                 continue
 
 
-feedtype = selectgenre(display_genres, feed_genres)
-checkedtitle, oldentry = readfeed(feedtype)
-print("input Q or q for exit.", end="\n")
-input("press Enter key: ")
-ischecked = False
+def main():
+    with open(file="feedurls.txt", mode="r", encoding="utf-8") as f:
+        urlinfo = f.read()
+    jogaimoji = (" ", "\n", "\t")
 
-while True:
+    for jmoji in jogaimoji:
+        urlinfo = urlinfo.replace(jmoji, "")
 
-    rssentries = getentries(urls[feedtype], oldentry, checkedtitle)
+    urlinfo = urlinfo.split("---")
+    urls = {}
 
-    # 日付順でソート
-    rssentries.sort(key=lambda x: x["date"], reverse=True)
-    print("     "*25)
-    displayTitle(rssentries, 37)
-    print()
-    print("""
-    以下の操作を行う場合は冒頭のアルファベットを入力してください
-    g: 記事のジャンルを変更する場合
-    c: 閲覧済みの記事を読みたい場合
-    """)
+    for i in urlinfo:
+        i = i.strip(",")
+        a = i.split("@")
+        feedurls = a[1].strip().split(",")
+        urls[a[0]] = feedurls
 
-    n = input("見たい記事の番号を入力: ")
+    feed_genres = tuple(urls.keys())
+    display_genres = "|"
 
-    if n.lower() == "q":
-        break
-    elif n.lower() == "g":
-        savefeed(rssentries, checkedtitle)
-        feedtype = selectgenre(display_genres, feed_genres)
-        checkedtitle, oldentry = readfeed(feedtype)
-        continue
-    elif n.lower() == "c":
-        readchecked(checkedtitle)
-        continue
-    else:
-        try:
-            n = int(n)
-            webbrowser.open_new(rssentries[n]["link"])
-            checked = rssentries.pop(n)
-            checkedtitle.append(checked)
-        except ValueError:
-            print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
+    for n, s in enumerate(feed_genres):
+        display_genres += f"{n}: {s}|"
+
+    feedtype = selectgenre(display_genres, feed_genres)
+    checkedtitle, oldentry, removed = readfeed(feedtype)
+    print("input Q or q for exit.", end="\n")
+    input("press Enter key: ")
+    # 記事を取得する場合に各サイトの取得件数を表示する場合はTrue
+    displaymode = True
+    while True:
+
+        rssentries = getentries(
+            urls[feedtype], oldentry, checkedtitle, removed, displaymode)
+        # 2回目以降は取得件数を表示しない
+        displaymode = False
+        # 日付順でソート
+        rssentries.sort(key=lambda x: x["date"], reverse=True)
+        print("     "*25)
+        displayTitle(rssentries, 37)
+        print(
+            """
+        以下の操作を行う場合は冒頭のアルファベットを入力してください
+        g: ジャンルを変更する c: 閲覧済記事を読む d: 記事除外Mode
+            """)
+
+        n = input("見たい記事の番号を入力: ")
+
+        if n.lower() == "q":
+            break
+        elif n.lower() == "g":
+            savefeed(rssentries, checkedtitle, removed, feedtype)
+            feedtype = selectgenre(display_genres, feed_genres)
+            checkedtitle, oldentry, removed = readfeed(feedtype)
             continue
-        except IndexError:
-            print("IndexError")
+        elif n.lower() == "c":
+
+            readchecked(checkedtitle)
             continue
+        elif n.lower() == "d":
+            rssentries, removed = removefeeds(rssentries, removed, feedtype)
+            savefeed(rssentries, checkedtitle, removed, feedtype)
+        else:
+            while True:
+                try:
+                    n = int(n)
+                    webbrowser.open_new(rssentries[n]["link"])
+                    checked = rssentries.pop(n)
+                    checkedtitle.append(checked)
+                    break
+                except ValueError:
+                    print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
+                    continue
+                except IndexError:
+                    print("IndexError")
+                    continue
+
+    savefeed(rssentries, checkedtitle, removed, feedtype)
 
 
-savefeed(rssentries, checkedtitle)
+if __name__ == "__main__":
+    main()
