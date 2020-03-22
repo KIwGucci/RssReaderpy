@@ -84,10 +84,12 @@ def writepickle(variable, filename):
 
 def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
     pretitle = ""
+    preday = ""
     for number, entry in enumerate(rssfeeds):
         # タイトルを表示
         thistitle = entry['title']
         sourceurl = entry["sourceurl"]
+        lastday = "{0:%Y/%m/%d}".format(entry["date"])
         if searchmode:
             import re
             repatter = re.compile(searchword)
@@ -100,6 +102,9 @@ def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
         elif pretitle == thistitle:
             maxcolumn += 1
             continue
+        if preday != lastday:
+            print(lastday)
+            preday = lastday
         pretitle = thistitle
         print(f'{number:0=2}: {thistitle[:36]}')
         if number > maxcolumn:
@@ -237,6 +242,7 @@ def main():
         elif n.lower() == "d":
             rssentries, removed = removefeeds(rssentries, removed, feedtype)
             savefeed(rssentries, checkedtitle, removed, feedtype)
+            continue
         elif n.lower() == "f":
             searchmode = True
             searchword = input("検索ワード＝: ")
