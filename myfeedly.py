@@ -205,8 +205,8 @@ def main():
     displaymode = True
     searchmode = False
     searchword = ""
+    checkedtitle, oldentry, removed = readfeed(feedtype)
     while True:
-        checkedtitle, oldentry, removed = readfeed(feedtype)
         rssentries = getentries(
             urls[feedtype], oldentry, checkedtitle, removed, displaymode)
         # 2回目以降は取得件数を表示しない
@@ -239,13 +239,13 @@ def main():
             savefeed(rssentries, checkedtitle, removed, feedtype)
             feedtype = selectgenre(display_genres, feed_genres)
             displaymode = True
+            checkedtitle, oldentry, removed = readfeed(feedtype)
             continue
         elif n.lower() == "c":
             readchecked(checkedtitle)
             continue
         elif n.lower() == "d":
             rssentries, removed = removefeeds(rssentries, removed, feedtype)
-            savefeed(rssentries, checkedtitle, removed, feedtype)
             continue
 
         elif n.lower() == "f":
@@ -265,7 +265,7 @@ def main():
             print("IndexError")
             continue
 
-        savefeed(rssentries, checkedtitle, removed, feedtype)
+    savefeed(rssentries, checkedtitle, removed, feedtype)
 
 
 if __name__ == "__main__":
