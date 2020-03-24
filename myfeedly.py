@@ -85,14 +85,16 @@ def writepickle(variable, filename):
 def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
     pretitle = ""
     preday = ""
+    if searchmode:
+        import re
+        # 検索パターンをコンパイル。大文字小文字を区別しない
+        repatter = re.compile(searchword,re.IGNORECASE)
     for number, entry in enumerate(rssfeeds):
         # タイトルを表示
         thistitle = entry['title']
         sourceurl = entry["sourceurl"]
         lastday = "{0:%Y/%m/%d}".format(entry["date"])
         if searchmode:
-            import re
-            repatter = re.compile(searchword)
             result = repatter.search(thistitle + sourceurl)
             if result:
                 pass
@@ -196,7 +198,7 @@ def main():
         display_genres += f"{n}: {s}|"
 
     feedtype = selectgenre(display_genres, feed_genres)
-    checkedtitle, oldentry, removed = readfeed(feedtype)
+    
     print("input Q or q for exit.", end="\n")
     input("press Enter key: ")
     # 記事を取得する場合に各サイトの取得件数を表示する場合はTrue
@@ -204,7 +206,7 @@ def main():
     searchmode = False
     searchword = ""
     while True:
-
+        checkedtitle, oldentry, removed = readfeed(feedtype)
         rssentries = getentries(
             urls[feedtype], oldentry, checkedtitle, removed, displaymode)
         # 2回目以降は取得件数を表示しない
@@ -229,11 +231,13 @@ def main():
         elif searchmode:
             if n.lower() == "fq":
                 searchmode = False
+                continue
+            else:
+                pass
 
         elif n.lower() == "g":
             savefeed(rssentries, checkedtitle, removed, feedtype)
             feedtype = selectgenre(display_genres, feed_genres)
-            checkedtitle, oldentry, removed = readfeed(feedtype)
             displaymode = True
             continue
         elif n.lower() == "c":
@@ -261,7 +265,7 @@ def main():
             print("IndexError")
             continue
 
-    savefeed(rssentries, checkedtitle, removed, feedtype)
+        savefeed(rssentries, checkedtitle, removed, feedtype)
 
 
 if __name__ == "__main__":
