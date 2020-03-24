@@ -229,7 +229,7 @@ def main():
         elif searchmode:
             if n.lower() == "fq":
                 searchmode = False
-                continue
+
         elif n.lower() == "g":
             savefeed(rssentries, checkedtitle, removed, feedtype)
             feedtype = selectgenre(display_genres, feed_genres)
@@ -243,26 +243,23 @@ def main():
             rssentries, removed = removefeeds(rssentries, removed, feedtype)
             savefeed(rssentries, checkedtitle, removed, feedtype)
             continue
+
         elif n.lower() == "f":
             searchmode = True
             searchword = input("検索ワード＝: ")
             continue
 
-        while True:
-            try:
-                n = int(n)
-                webbrowser.open_new(rssentries[n]["link"])
-                checked = rssentries.pop(n)
-                checkedtitle.append(checked)
-                break
-            except ValueError:
-                if n.lower() == "q":
-                    return None
-                print("適切な数値を入力してください。終了する場合は q か Qを入力してください")
-            except IndexError:
-                print("IndexError")
-
-            n = input("見たい記事の番号を入力: ")
+        try:
+            n = int(n)
+            webbrowser.open_new(rssentries[n]["link"])
+            checked = rssentries.pop(n)
+            checkedtitle.append(checked)
+        except ValueError:
+            print("ValueError")
+            continue
+        except IndexError:
+            print("IndexError")
+            continue
 
     savefeed(rssentries, checkedtitle, removed, feedtype)
 

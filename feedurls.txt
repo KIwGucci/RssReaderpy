@@ -31,5 +31,5 @@ News@
 公的機関@
 	    https://www.mhlw.go.jp/stf/news.rdf,
 	    https://www.mhlw.go.jp/rss/inful_news.rdf,
-	    https://www.mhlw.go.jp/stf/kinkyu.rdf
-	
+	    https://www.mhlw.go.jp/stf/kinkyu.rdf,
+	    https://www.jma-net.go.jp/rss/jma.rss
