@@ -5,7 +5,8 @@ News@
         https://mainichi.jp/rss/etc/mainichi-flash.rss,
         https://news.yahoo.co.jp/pickup/rss.xml,
         https://headlines.yahoo.co.jp/rss/kantele-dom.xml,
-        https://headlines.yahoo.co.jp/rss/ytv-dom.xml
+        https://headlines.yahoo.co.jp/rss/ytv-dom.xml,
+        http://feeds.cnn.co.jp/cnn/rss
 ---
 デジタル@
         https://www.gizmodo.jp/index.xml,
@@ -33,3 +34,7 @@ News@
 	    https://www.mhlw.go.jp/rss/inful_news.rdf,
 	    https://www.mhlw.go.jp/stf/kinkyu.rdf,
 	    https://www.jma-net.go.jp/rss/jma.rss
+---
+English_News@
+        https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml,
+        https://www.independent.co.uk/rss

@@ -7,7 +7,7 @@ import pickle
 
 def selectgenre(genretitles, genredata):
     while True:
-        print(f"Feed types are {genretitles}")
+        print(f"Genre:{genretitles}")
         try:
             genrenum = int(input("閲覧するFeed typeを番号で入力してください: "))
             ftype = genredata[genrenum]
@@ -82,13 +82,13 @@ def writepickle(variable, filename):
         pickle.dump(variable, f)
 
 
-def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
+def displayTitle(rssfeeds, maxcolumn, maxrow, searchword="", searchmode=False):
     pretitle = ""
     preday = ""
     if searchmode:
         import re
         # 検索パターンをコンパイル。大文字小文字を区別しない
-        repatter = re.compile(searchword,re.IGNORECASE)
+        repatter = re.compile(searchword, re.IGNORECASE)
     for number, entry in enumerate(rssfeeds):
         # タイトルを表示
         thistitle = entry['title']
@@ -101,14 +101,14 @@ def displayTitle(rssfeeds, maxcolumn, searchword="", searchmode=False):
             else:
                 maxcolumn += 1
                 continue
-        elif pretitle == thistitle:
+        elif pretitle == thistitle or thistitle == "":
             maxcolumn += 1
             continue
         if preday != lastday:
             print(lastday)
             preday = lastday
         pretitle = thistitle
-        print(f'{number:0=2}: {thistitle[:36]}')
+        print(f'{number:0=2}: {thistitle[:maxrow]}')
         if number > maxcolumn:
             return None
 
@@ -127,17 +127,17 @@ def readfeed(ftype):
     checked = readpickle(ftype+"checkedfeeds")
     old = readpickle(ftype+"oldentry")
     removed = readpickle(ftype+"removed")
-    for feedlist in (checked,old,removed):
+    for feedlist in (checked, old, removed):
         feedlist.sort(key=lambda x: x["date"], reverse=True)
     return checked, old, removed
 
 
-def removefeeds(feeds, removed, ftype):
+def removefeeds(feeds, removed, maxrow=37):
     """remove feedtitle"""
     print("   "*200)
     while True:
         print("   "*25)
-        displayTitle(feeds, 37)
+        displayTitle(feeds, 37, maxrow)
         print("除外モード")
         print("除外モードを終える場合はqを入力")
         n = input("除外する記事の番号を入力: ")
@@ -154,11 +154,11 @@ def removefeeds(feeds, removed, ftype):
     return feeds, removed
 
 
-def readchecked(feeds):
+def readchecked(feeds,maxrow=37):
     print("   "*200)
     while True:
         print("    "*25)
-        displayTitle(feeds, 37)
+        displayTitle(feeds, 37, maxrow)
         print("閲覧済モード")
         print("閲覧済モードを終える場合はqを入力")
         n = input("みたい記事の番号を入力: ")
@@ -200,7 +200,7 @@ def main():
         display_genres += f"{n}: {s}|"
 
     feedtype = selectgenre(display_genres, feed_genres)
-    
+
     print("input Q or q for exit.", end="\n")
     input("press Enter key: ")
     # 記事を取得する場合に各サイトの取得件数を表示する場合はTrue
@@ -214,15 +214,21 @@ def main():
         # 2回目以降は取得件数を表示しない
         displaymode = False
         print("     "*25)
-        print(f"Feed Type: {feedtype}")
+        print(f"Genre: {feedtype}")
+        maxcol = 37
+        if "english" in feedtype.lower():
+            maxrow = 65
+        else:
+            maxrow = 37
         if searchmode:
+            print("     "*25)
             print(f"検索ワード:{searchword}")
-            displayTitle(rssentries, 37, searchword, searchmode)
+            displayTitle(rssentries, maxcol, maxrow, searchword, searchmode)
             print("""
             fq で通常モードに戻る
             """)
         else:
-            displayTitle(rssentries, 37, searchword, searchmode)
+            displayTitle(rssentries, maxcol, maxrow, searchword, searchmode)
             print()
             print("g:ジャンルを変更する c:閲覧済記事を読む d:記事除外Mode f:検索モード q:終了")
 
@@ -244,10 +250,10 @@ def main():
             checkedtitle, oldentry, removed = readfeed(feedtype)
             continue
         elif n.lower() == "c":
-            readchecked(checkedtitle)
+            readchecked(checkedtitle,maxrow)
             continue
         elif n.lower() == "d":
-            rssentries, removed = removefeeds(rssentries, removed, feedtype)
+            rssentries, removed = removefeeds(rssentries, removed, maxrow)
             continue
 
         elif n.lower() == "f":
