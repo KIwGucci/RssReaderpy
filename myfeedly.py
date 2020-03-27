@@ -127,6 +127,8 @@ def readfeed(ftype):
     checked = readpickle(ftype+"checkedfeeds")
     old = readpickle(ftype+"oldentry")
     removed = readpickle(ftype+"removed")
+    for feedlist in (checked,old,removed):
+        feedlist.sort(key=lambda x: x["date"], reverse=True)
     return checked, old, removed
 
 
