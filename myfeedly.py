@@ -108,7 +108,8 @@ def displayTitle(rssfeeds, maxcolumn, maxrow, searchword="", searchmode=False):
             print(lastday)
             preday = lastday
         pretitle = thistitle
-        print(f'{number:0=2}: {thistitle[:maxrow]}')
+        thistitle = thistitle.replace("&apos;","")
+        print(f"{number:0=2}: {thistitle[:maxrow]}")
         if number > maxcolumn:
             return None
 
@@ -154,7 +155,7 @@ def removefeeds(feeds, removed, maxrow=37):
     return feeds, removed
 
 
-def readchecked(feeds,maxrow=37):
+def readchecked(feeds, maxrow=37):
     print("   "*200)
     while True:
         print("    "*25)
@@ -250,7 +251,7 @@ def main():
             checkedtitle, oldentry, removed = readfeed(feedtype)
             continue
         elif n.lower() == "c":
-            readchecked(checkedtitle,maxrow)
+            readchecked(checkedtitle, maxrow)
             continue
         elif n.lower() == "d":
             rssentries, removed = removefeeds(rssentries, removed, maxrow)
