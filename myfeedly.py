@@ -29,8 +29,9 @@ def parseDate(dateData):
 
 
 # 取得&整形
-def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
+def getentries(gurls, oldentry, checkedtitle, displaymode=True):
     getentry = oldentry
+
     # 除外する記事のキーワード
     exclusionword = ["セール情報", "閲覧注意"]
 
@@ -38,6 +39,8 @@ def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
         entrydic = parse(url).entries
         if displaymode:
             print(f"{url}の記事を{len(entrydic)}件取得")
+        else:
+            pass
         for entry in entrydic:
             kiji = {
                 "title": entry["title"], "link": entry["link"],
@@ -45,16 +48,14 @@ def getentries(gurls, oldentry, checkedtitle, removetitle, displaymode=True):
                 "sourceurl": url
             }
             if True in [word in kiji["title"] for word in exclusionword]:
-                continue
+                pass
             elif True in [kiji["link"] == k["link"] for k in getentry]:
-                continue
+                pass
             elif True in [kiji["link"] == k["link"] for k in checkedtitle]:
-                continue
-            elif True in [kiji["link"] == k["link"] for k in removetitle]:
-                continue
+                pass
             else:
                 getentry.append(kiji)
-    getentry.sort(key=lambda x: x["date"], reverse=True)
+    getentry = sorted(getentry, key=lambda x: x['date'], reverse=True)
     return getentry
 
 
@@ -108,51 +109,27 @@ def displayTitle(rssfeeds, maxcolumn, maxrow, searchword="", searchmode=False):
             print(lastday)
             preday = lastday
         pretitle = thistitle
-        thistitle = thistitle.replace("&apos;","")
+        thistitle = thistitle.replace("&apos;", "")
         print(f"{number:0=2}: {thistitle[:maxrow]}")
+        # print(f"{entry['date']} {entry['sourceurl']}")
         if number > maxcolumn:
             return None
 
 
-def savefeed(rssfeeds, checkedfeeds, removefeeds, ftype):
+def savefeed(rssfeeds, checkedfeeds, ftype):
     rssfeeds.sort(key=lambda x: x["date"], reverse=True)
     checkedfeeds.sort(key=lambda x: x["date"], reverse=True)
-    removefeeds.sort(key=lambda x: x["date"], reverse=True)
     writepickle(rssfeeds[:500], ftype+'oldentry')
     writepickle(checkedfeeds[:500], ftype+'checkedfeeds')
-    writepickle(removefeeds[:100], ftype+"removedfeeds")
 
 
 def readfeed(ftype):
-    """return (checkedfeeds, oldentry,removed)"""
+    """return (checkedfeeds, oldentry)"""
     checked = readpickle(ftype+"checkedfeeds")
     old = readpickle(ftype+"oldentry")
-    removed = readpickle(ftype+"removed")
-    for feedlist in (checked, old, removed):
+    for feedlist in (checked, old):
         feedlist.sort(key=lambda x: x["date"], reverse=True)
-    return checked, old, removed
-
-
-def removefeeds(feeds, removed, maxrow=37):
-    """remove feedtitle"""
-    print("   "*200)
-    while True:
-        print("   "*25)
-        displayTitle(feeds, 37, maxrow)
-        print("除外モード")
-        print("除外モードを終える場合はqを入力")
-        n = input("除外する記事の番号を入力: ")
-        if n.lower() == "q":
-            break
-        else:
-            try:
-                n = int(n)
-                sure = input(f"{feeds[n]['title']}を除外しますか　y/n ?")
-                if sure.lower() == 'y':
-                    removed.append(feeds.pop(n))
-            except ValueError:
-                print("誤った入力です")
-    return feeds, removed
+    return checked, old
 
 
 def readchecked(feeds, maxrow=37):
@@ -208,10 +185,10 @@ def main():
     displaymode = True
     searchmode = False
     searchword = ""
-    checkedtitle, oldentry, removed = readfeed(feedtype)
+    checkedtitle, oldentry = readfeed(feedtype)
     while True:
         rssentries = getentries(
-            urls[feedtype], oldentry, checkedtitle, removed, displaymode)
+            urls[feedtype], oldentry, checkedtitle, displaymode)
         # 2回目以降は取得件数を表示しない
         displaymode = False
         print("     "*25)
@@ -245,16 +222,13 @@ def main():
                 pass
 
         elif n.lower() == "g":
-            savefeed(rssentries, checkedtitle, removed, feedtype)
+            savefeed(rssentries, checkedtitle, feedtype)
             feedtype = selectgenre(display_genres, feed_genres)
             displaymode = True
-            checkedtitle, oldentry, removed = readfeed(feedtype)
+            checkedtitle, oldentry = readfeed(feedtype)
             continue
         elif n.lower() == "c":
             readchecked(checkedtitle, maxrow)
-            continue
-        elif n.lower() == "d":
-            rssentries, removed = removefeeds(rssentries, removed, maxrow)
             continue
 
         elif n.lower() == "f":
@@ -274,7 +248,7 @@ def main():
             print("IndexError")
             continue
 
-    savefeed(rssentries, checkedtitle, removed, feedtype)
+    savefeed(rssentries, checkedtitle, feedtype)
 
 
 if __name__ == "__main__":

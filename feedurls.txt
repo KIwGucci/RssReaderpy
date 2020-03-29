@@ -3,9 +3,6 @@ News@
         https://assets.wor.jp/rss/rdf/reuters/top.rdf,
         https://assets.wor.jp/rss/rdf/nikkei/news.rdf,
         https://mainichi.jp/rss/etc/mainichi-flash.rss,
-        https://news.yahoo.co.jp/pickup/rss.xml,
-        https://headlines.yahoo.co.jp/rss/kantele-dom.xml,
-        https://headlines.yahoo.co.jp/rss/ytv-dom.xml,
         http://feeds.cnn.co.jp/cnn/rss
 ---
 デジタル@
@@ -20,7 +17,7 @@ News@
         http://hamusoku.com/index.rdf,
         https://b.hatena.ne.jp/hotentry.rss,
         http://gigazine.net/news/rss_2.0/,
-        https://srad.jp/sradjp.rss
+        https://srad.jp/sradjp.rss,
 ---
 雑誌系@
         https://news.nifty.com/rss/magazine_nhktext.xml,
