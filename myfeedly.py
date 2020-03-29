@@ -48,14 +48,15 @@ def getentries(gurls, oldentry, checkedtitle, displaymode=True):
                 "sourceurl": url
             }
             if True in [word in kiji["title"] for word in exclusionword]:
-                pass
+                continue
             elif True in [kiji["link"] == k["link"] for k in getentry]:
-                pass
+                continue
             elif True in [kiji["link"] == k["link"] for k in checkedtitle]:
-                pass
+                continue
             else:
                 getentry.append(kiji)
-    getentry = sorted(getentry, key=lambda x: x['date'], reverse=True)
+
+    getentry.sort(key=lambda x: x['date'], reverse=True)
     return getentry
 
 
@@ -119,8 +120,8 @@ def displayTitle(rssfeeds, maxcolumn, maxrow, searchword="", searchmode=False):
 def savefeed(rssfeeds, checkedfeeds, ftype):
     rssfeeds.sort(key=lambda x: x["date"], reverse=True)
     checkedfeeds.sort(key=lambda x: x["date"], reverse=True)
-    writepickle(rssfeeds[:500], ftype+'oldentry')
-    writepickle(checkedfeeds[:500], ftype+'checkedfeeds')
+    writepickle(rssfeeds[:300], ftype+'oldentry')
+    writepickle(checkedfeeds[:300], ftype+'checkedfeeds')
 
 
 def readfeed(ftype):
