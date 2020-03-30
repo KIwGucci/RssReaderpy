@@ -111,8 +111,8 @@ def displayTitle(rssfeeds, maxcolumn, maxrow, searchword="", searchmode=False):
             preday = lastday
         pretitle = thistitle
         thistitle = thistitle.replace("&apos;", "")
+        thistitle = thistitle.replace("Coronavirus", "Covid19")
         print(f"{number:0=2}: {thistitle[:maxrow]}")
-        # print(f"{entry['date']} {entry['sourceurl']}")
         if number > maxcolumn:
             return None
 
@@ -128,8 +128,6 @@ def readfeed(ftype):
     """return (checkedfeeds, oldentry)"""
     checked = readpickle(ftype+"checkedfeeds")
     old = readpickle(ftype+"oldentry")
-    for feedlist in (checked, old):
-        feedlist.sort(key=lambda x: x["date"], reverse=True)
     return checked, old
 
 
@@ -179,9 +177,6 @@ def main():
         display_genres += f"{n}: {s}|"
 
     feedtype = selectgenre(display_genres, feed_genres)
-
-    print("input Q or q for exit.", end="\n")
-    input("press Enter key: ")
     # 記事を取得する場合に各サイトの取得件数を表示する場合はTrue
     displaymode = True
     searchmode = False
